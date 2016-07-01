@@ -12,7 +12,6 @@ var main = function() {
     }
     switch (argv.site) {
         case 'explosm':
-            var q = argv.site;
             osmosis
                 .get('http://explosm.net/comics/archive')
                 .find('ul.no-bullet > li > a')
@@ -27,6 +26,35 @@ var main = function() {
                 .data(function(scrapeData) {
                     console.log(scrapeData);
                 }).debug(console.log);
+            break;
+
+        case 'channelate':
+            osmosis
+                .get('http://www.channelate.com/?randomcomic&nocache=1')
+                .set({
+                    image: 'div#comic-1 > img@src',
+                    title: 'h2.post-title > a',
+                    author: 'span.post-author > a',
+                    publish_date: 'span.post-date'
+                })
+                .data(function(scrapeData) {
+                    console.log(scrapeData);
+                }).debug(console.log);
+
+            break;
+
+        case 'ex':
+            osmosis
+                .get('http://explosm.net/comics/random')
+                .set({
+                    image: '#main-comic@src',
+                    author: 'small.author-credit-name',
+                    publish_date: '.past-week-comic-title'
+                })
+                .data(function(scrapeData) {
+                    console.log(scrapeData);
+                }).debug(console.log);
+
             break;
 
         default:
