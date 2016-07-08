@@ -1,6 +1,5 @@
 var osmosis = require('osmosis');
 var argv = require('minimist')(process.argv.slice(2));
-var open = require('amqplib').connect('amqp://localhost');
 
 var usage = function() {
     console.log('Usage:\nnode index.js --site=<site name>');
@@ -13,28 +12,49 @@ var main = function() {
     }
     switch (argv.site) {
         case 'explosm':
-            var q = argv.site;
             osmosis
                 .get('http://explosm.net/comics/archive')
                 .find('ul.no-bullet > li > a')
-                .set('location')
+                .follow('@href')
+                .find('h3.past-week-comic-title a')
                 .follow('@href')
                 .set({
-                    links: ['h3.past-week-comic-title > a@href']
+                    image: '#main-comic@src',
+                    author: 'small.author-credit-name',
+                    publish_date: '.past-week-comic-title'
                 })
                 .data(function(scrapeData) {
-                    // Push all the links to the queue
-                    open.then(function(conn) {
-                        return conn.createChannel();
-                    }).then(function(ch) {
-                        return ch.assertQueue(q).then(function(ok) {
-                            for (var i = 0; i < scrapeData.links.length; i++) {
-                                ch.sendToQueue(q, new Buffer(scrapeData.links[i]));
-                            }
-                            return ch.close();
-                        });
-                    }).catch(console.warn);
-                });
+                    console.log(scrapeData);
+                }).debug(console.log);
+            break;
+
+        case 'channelate':
+            osmosis
+                .get('http://www.channelate.com/?randomcomic&nocache=1')
+                .set({
+                    image: 'div#comic-1 > img@src',
+                    title: 'h2.post-title > a',
+                    author: 'span.post-author > a',
+                    publish_date: 'span.post-date'
+                })
+                .data(function(scrapeData) {
+                    console.log(scrapeData);
+                }).debug(console.log);
+
+            break;
+
+        case 'ex':
+            osmosis
+                .get('http://explosm.net/comics/random')
+                .set({
+                    image: '#main-comic@src',
+                    author: 'small.author-credit-name',
+                    publish_date: '.past-week-comic-title'
+                })
+                .data(function(scrapeData) {
+                    console.log(scrapeData);
+                }).debug(console.log);
+
             break;
 
         default:
