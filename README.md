@@ -8,10 +8,6 @@
 
 To run:
 
-    node index.js --site=explosm
+    node index.js --site=channelate
 
-This would crawl Explosm and push to the queue
-
-Then :
-
-    node extract.js
+This would return the details of a Random Comic
